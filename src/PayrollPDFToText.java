@@ -21,7 +21,7 @@ public class PayrollPDFToText
 			PDDocument pdfFile = PDDocument.load(file);
 			PDFTextStripper pdfTextStripper = new PDFTextStripper();
 			String fileTextString = pdfTextStripper.getText(pdfFile);
-			newFile = new File(createNewFileName(fileTextString));
+			this.newFile = new File(createNewFileName(fileTextString));
 			FileWriter fw = new FileWriter(newFile);
 
 			fw.write(fileTextString);
