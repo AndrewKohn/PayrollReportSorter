@@ -5,9 +5,19 @@ public class PayrollReportSorter
 {
 	public static void main(String[] args)
 	{
-		for(int i = 0; i < getInputFiles().toArray().length; i++){
-			PayrollPDFToText file = new PayrollPDFToText(new File("src/Payroll Folder/Input/" + getInputFiles().toArray()[i]));
-			PayrollSorter sorter = new PayrollSorter(file.getNewFile(), file.getFacilityName(),file.getPayrollDate());
+		if(getInputFiles().toArray().length > 0){
+			runApp(getInputFiles());
+		}else{
+			System.out.println("ArrayList length: " + getInputFiles().toArray().length);
+			System.out.println("!!***********  No valid files in 'src/Payroll Folder/Input/' folder  ***********!!");
+		}
+	}
+
+	private static void runApp(ArrayList<String> reportFiles){
+		for(int i = 0; i < reportFiles.toArray().length; i++){
+			String filePath = "src/Payroll Folder/Input/" + reportFiles.toArray()[i];
+			PayrollPDFToText file = new PayrollPDFToText(new File(filePath));
+			PayrollSorter sorter = new PayrollSorter(file.getNewFile(), file.getFacilityName(), file.getPayrollDate());
 
 			System.out.println(sorter.displayInfo());
 		}
