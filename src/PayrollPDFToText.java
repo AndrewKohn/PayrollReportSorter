@@ -8,32 +8,32 @@ import java.util.Scanner;
 
 public class PayrollPDFToText
 {
+	private File newFile = new File("");
+	private String facilityName = null;
+	private String payrollDate = null;
+
 	public PayrollPDFToText(File file){
 		pdfToText(file);
 	}
 
-	private static void pdfToText(File file){
+	private void pdfToText(File file){
 		try{
 			PDDocument pdfFile = PDDocument.load(file);
 			PDFTextStripper pdfTextStripper = new PDFTextStripper();
 			String fileTextString = pdfTextStripper.getText(pdfFile);
-			File newFile = new File(createNewFileName(fileTextString));
+			newFile = new File(createNewFileName(fileTextString));
 			FileWriter fw = new FileWriter(newFile);
 
 			fw.write(fileTextString);
 			fw.close();
 			pdfFile.close();
-
 		}catch (IOException e){
 			System.out.println("ERROR: Unable to translate a PDF to a text file...");
 			e.printStackTrace();
 		}
-
 	}
 
-	private static String createNewFileName(String pdfStrippedText){
-		String facilityName = null;
-		String payrollDate = null;
+	private String createNewFileName(String pdfStrippedText){
 		Scanner scanner = new Scanner(pdfStrippedText);
 
 		while(scanner.hasNext()){
@@ -47,10 +47,21 @@ public class PayrollPDFToText
 		return "src/Payroll Folder/Output/" +  payrollDate + "__" + facilityName + ".txt";
 	}
 
-	public static String[] getFileDate(String dateString){
+	public String[] getFileDate(String dateString){
 		String temp = dateString.replace("/", "-");
-		String[] splitStr = temp.split(" ");
 
-		return splitStr;
+		return temp.split(" ");
+	}
+
+	public File getNewFile(){
+		return newFile;
+	}
+
+	public String getFacilityName(){
+		return facilityName;
+	}
+
+	public String getPayrollDate(){
+		return payrollDate;
 	}
 }
