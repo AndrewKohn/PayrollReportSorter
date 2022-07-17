@@ -7,7 +7,7 @@ A personal program to sort staff's time-clocks in payroll reports between multip
 
 ## How to use
 <div align="center">This project is currently using ver 2.0.26 of pdfbox.</div>
-<div align="center"><a href="https://pdfbox.apache.org/download.html">Link to download</a></div>
+<div align="center"><a href="https://pdfbox.apache.org/download.html" target="_blank">Link to download</a></div>
 
 * Download
 * Add to project structure
