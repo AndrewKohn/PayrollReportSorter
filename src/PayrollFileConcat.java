@@ -36,15 +36,18 @@ public class PayrollFileConcat
 					}
 				}
 
-				//Writes all other keys
+				// Writes all other keys
 				for(Map.Entry<Integer, ArrayList<String>> map: employeeMap.entrySet()){
 					for(int duplicateKey : duplicateKeys){
+
+						// Compares against first map
 						for(Map.Entry<Integer, ArrayList<String>> firstMap : map1.entrySet()){
 							if(map.getKey().equals(firstMap.getKey()) && !map.getKey().equals(duplicateKey)){
 								writeKeyValues(bw, map, facilityName1, file1Date, missedClockOuts);
 							}
 						}
 
+						// Compares against second map
 						for(Map.Entry<Integer, ArrayList<String>> secondMap : map2.entrySet()){
 							if(map.getKey().equals(secondMap.getKey()) && !map.getKey().equals(duplicateKey)){
 								writeKeyValues(bw, map, facilityName2, file2Date, missedClockOuts);
@@ -79,6 +82,7 @@ public class PayrollFileConcat
 		}
 	}
 
+	// if map.key is present in multiple facilities, then data is written to file first.
 	private void writeDuplicateKey(BufferedWriter bw, Map.Entry<Integer, ArrayList<String>> map1, Map.Entry<Integer, ArrayList<String>> map2, String name, String fileDate, String facilityName1, String facilityName2, Set<String> missedClockOuts){
 		try{
 
@@ -123,6 +127,7 @@ public class PayrollFileConcat
 		}
 	}
 
+	// Writes the rest of the unique map.keys
 	private void writeKeyValues(BufferedWriter bw, Map.Entry<Integer, ArrayList<String>> map, String facilityName, String fileDate, Set<String> missedClockOuts){
 		try{
 			String name = map.getValue().toArray()[0].toString().split(" #")[0];
