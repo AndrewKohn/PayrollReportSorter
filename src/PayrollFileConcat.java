@@ -21,12 +21,6 @@ public class PayrollFileConcat
 		String facilityName1 = file1Str[3].split("__")[1].replace(".txt", "");
 		String facilityName2 = file2Str[3].split("__")[1].replace(".txt", "");
 
-
-		System.out.println("Map1 size: " + map1.size());
-		System.out.println("Map2 size: " + map2.size());
-		System.out.println("Emp size: " + employeeMap.size());
-
-
 		try{
 			File concatFile = new File(filePath + file1Date + "__FINAL.txt");
 			FileWriter fw = new FileWriter(concatFile);
@@ -118,14 +112,10 @@ public class PayrollFileConcat
 				bw.newLine();
 				bw.newLine();
 
-
-
 				duplicateKeys.add(map2.getKey());
-				System.out.println(map1.getKey() + " : " + map2.getKey() + "  -> KEYS MATCH" + duplicateKeys);
 			}else{
 				employeeMap.put(map1.getKey(), map1.getValue());
 				employeeMap.put(map2.getKey(), map2.getValue());
-				System.out.println(map1.getKey() + " : " + map2.getKey());
 			}
 		}catch (IOException e){
 			System.out.println("ERROR: problem with attempting to write a duplicate key...");
