@@ -10,6 +10,7 @@ import java.util.Set;
 public class PayrollFileConcat
 {
 	private Map<Integer, ArrayList<String>> employeeMap = new HashMap<>();
+	private ArrayList<Integer> duplicateKeys = new ArrayList<>();
 
 	public PayrollFileConcat(Map<Integer, ArrayList<String>> map1, File file1, Map<Integer, ArrayList<String>> map2, File file2, Set<String> missedClockOuts){
 		String filePath = "src/Payroll Folder/Output/";
@@ -20,40 +21,43 @@ public class PayrollFileConcat
 		String facilityName1 = file1Str[3].split("__")[1].replace(".txt", "");
 		String facilityName2 = file2Str[3].split("__")[1].replace(".txt", "");
 
-		try{
-			if(file1Date.equals(file2Date)){
-				File concatFile = new File(filePath + file1Date + "__FINAL.txt");
-				FileWriter fw = new FileWriter(concatFile);
-				BufferedWriter bw = new BufferedWriter(fw);
 
+		System.out.println("Map1 size: " + map1.size());
+		System.out.println("Map2 size: " + map2.size());
+		System.out.println("Emp size: " + employeeMap.size());
+
+
+		try{
+			File concatFile = new File(filePath + file1Date + "__FINAL.txt");
+			FileWriter fw = new FileWriter(concatFile);
+			BufferedWriter bw = new BufferedWriter(fw);
+			if(file1Date.equals(file2Date)){
+				// writes duplicate keys for facilities first
 				for(Map.Entry<Integer, ArrayList<String>> firstMap: map1.entrySet()){
 					String name = firstMap.getValue().toArray()[0].toString().split(" #")[0];
-					String currentFacility = facilityName1;
 
-					createHeader(bw, firstMap.getKey().toString(), name, file1Date);
-					bw.newLine();
-					bw.newLine();
+					for(Map.Entry<Integer, ArrayList<String>> secondMap : map2.entrySet())
+					{
+						writeDuplicateKey(bw, firstMap, secondMap, name, file2Date, facilityName1, facilityName2, missedClockOuts);
+					}
+				}
 
-					for(Map.Entry<Integer, ArrayList<String>> secondMap : map2.entrySet()){
-						if(firstMap.getKey().equals(secondMap.getKey())){
-							bw.write("			" + facilityName1);
-							bw.newLine();
-							for(String firstStr : firstMap.getValue()){
-								bw.write(firstStr);
-								bw.newLine();
+				//Writes all other keys
+				for(Map.Entry<Integer, ArrayList<String>> map: employeeMap.entrySet()){
+					for(int duplicateKey : duplicateKeys){
+						for(Map.Entry<Integer, ArrayList<String>> firstMap : map1.entrySet()){
+							if(map.getKey().equals(firstMap.getKey()) && !map.getKey().equals(duplicateKey)){
+								writeKeyValues(bw, map, facilityName1, file1Date, missedClockOuts);
 							}
+						}
 
-							bw.write("			" + facilityName2);
-							bw.newLine();
-							for(String secondStr : secondMap.getValue()){
-								bw.write(secondStr);
-								bw.newLine();
+						for(Map.Entry<Integer, ArrayList<String>> secondMap : map2.entrySet()){
+							if(map.getKey().equals(secondMap.getKey()) && !map.getKey().equals(duplicateKey)){
+								writeKeyValues(bw, map, facilityName2, file2Date, missedClockOuts);
 							}
-							bw.write("=======================================");
-							bw.newLine();
-							bw.newLine();
 						}
 					}
+
 				}
 				bw.close();
 			}else{
@@ -74,30 +78,89 @@ public class PayrollFileConcat
 
 			bw.write((date));
 			bw.newLine();
+			bw.newLine();
 		}catch (IOException e){
 			System.out.println("ERROR: unable to create employee headers");
 			e.printStackTrace();
 		}
 	}
 
+	private void writeDuplicateKey(BufferedWriter bw, Map.Entry<Integer, ArrayList<String>> map1, Map.Entry<Integer, ArrayList<String>> map2, String name, String fileDate, String facilityName1, String facilityName2, Set<String> missedClockOuts){
+		try{
 
-	private void setEmployeeMap(Map<Integer, ArrayList<String>> map1, Map<Integer, ArrayList<String>> map2){
-		for(Map.Entry<Integer, ArrayList<String>> map : map1.entrySet()){
-			employeeMap.put(map.getKey(), map.getValue());
-		}
+			if(map2.getKey().equals(map1.getKey())){
+				createHeader(bw, map2.getKey().toString(), name, fileDate);
 
-		for(Map.Entry<Integer, ArrayList<String>> map : map2.entrySet()){
-			employeeMap.put(map.getKey(), map.getValue());
+				bw.write("			" + facilityName1);
+				bw.newLine();
+				for(String firstStr : map1.getValue()){
+					bw.write("    " + firstStr);
+					bw.newLine();
+				}
+				bw.write("			" + facilityName2);
+				bw.newLine();
+				for(String secondStr : map2.getValue()){
+					bw.write("    " + secondStr);
+					bw.newLine();
+				}
+
+				bw.newLine();
+				bw.write("      ********Missing Clock Out********");
+				bw.newLine();
+				for(String missedClockOut : missedClockOuts){
+					if(missedClockOut.contains(name)){
+						bw.write("      " + missedClockOut);
+						bw.newLine();
+					}
+				}
+				bw.newLine();
+				bw.write("=======================================");
+				bw.newLine();
+				bw.newLine();
+
+
+
+				duplicateKeys.add(map2.getKey());
+				System.out.println(map1.getKey() + " : " + map2.getKey() + "  -> KEYS MATCH" + duplicateKeys);
+			}else{
+				employeeMap.put(map1.getKey(), map1.getValue());
+				employeeMap.put(map2.getKey(), map2.getValue());
+				System.out.println(map1.getKey() + " : " + map2.getKey());
+			}
+		}catch (IOException e){
+			System.out.println("ERROR: problem with attempting to write a duplicate key...");
+			e.printStackTrace();
 		}
 	}
 
-	public Map<Integer, ArrayList<String>> getEmployeeMap(){
-		return employeeMap;
-	}
+	private void writeKeyValues(BufferedWriter bw, Map.Entry<Integer, ArrayList<String>> map, String facilityName, String fileDate, Set<String> missedClockOuts){
+		try{
+			String name = map.getValue().toArray()[0].toString().split(" #")[0];
 
-	private void printValues(){
-		for(Map.Entry<Integer, ArrayList<String>> map : employeeMap.entrySet()){
-			System.out.println(map.getKey());
+			createHeader(bw, map.getKey().toString(), name, fileDate);
+
+			bw.write("			" + facilityName);
+			bw.newLine();
+			for(String firstStr : map.getValue()){
+				bw.write("    " + firstStr);
+				bw.newLine();
+			}
+			bw.newLine();
+			bw.write("      ********Missing Clock Out********");
+			bw.newLine();
+			for(String missedClockOut : missedClockOuts){
+				if(missedClockOut.contains(name)){
+					bw.write("      " + missedClockOut);
+					bw.newLine();
+				}
+			}
+			bw.newLine();
+			bw.write("=======================================");
+			bw.newLine();
+			bw.newLine();
+		}catch (IOException e){
+			System.out.println("ERROR: Issues writing map values onto file...");
+			e.printStackTrace();
 		}
 	}
 }
